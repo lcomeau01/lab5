@@ -21,9 +21,16 @@ def index():
     max_count_results.info()
     max_count =  int(max_count_results['count("MONTH")'][0]) 
 
-    filter_ranges_query = f'SELECT MIN(HUMIDITY), MAX(HUMIDITY), MIN(TEMP), MAX(TEMP), MIN(WIND), MAX(WIND) FROM forestfires.csv' # TODO: write a query that retrieves the the minimum and maximum value for each slider
+    filter_ranges_query = f'SELECT MIN(humidity), MAX(humidity), MIN(temp), MAX(temp), MIN(wind), MAX(wind) FROM forestfires.csv' 
     filter_ranges_results = duckdb.sql(filter_ranges_query).df()
-    filter_ranges = {} # TODO: Create a dictionary where each key is a filter and values are the minimum and maximum values
+    filter_ranges_results.info()
+    min_humidity, max_humidity, min_temp, max_temp, min_wind, max_wind = filter_ranges_results['min(humidity)'], filter_ranges_results['max(humidity)'], filter_ranges_results['min("temp")'], filter_ranges_results['max("temp")'], filter_ranges_results['min(wind)'], filter_ranges_results['max(wind)']
+    
+    filter_ranges = {
+    "humidity": (int(min_humidity[0]), float(max_humidity[0])),
+    "temp": (float(min_temp[0]), float(max_temp[0])),
+    "wind": (float(min_wind[0]), float(max_wind[0])) 
+    }
 
     return render_template(
         'index.html', months=months, days=days,
@@ -33,6 +40,7 @@ def index():
 @app.route('/update', methods=["POST"])
 def update():
     request_data = request.get_json()
+    print("request data: ", request_data)
     continuous_predicate = ' AND '.join([f'({column} >= 0 AND {column} <= 0)' for column in continuous_columns]) # TODO: update where clause from sliders
     discrete_predicate = ' AND '.join([f'{column} IN mon' for column in discrete_columns]) # TODO: update where clause from checkboxes
     predicate = ' AND '.join([continuous_predicate, discrete_predicate]) # Combine where clause from sliders and checkboxes
