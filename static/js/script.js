@@ -68,6 +68,19 @@ function draw_scatter(data, svg, scale){
 
 // TODO: write a function that updates the bar
 function draw_bar(data, svg, scale){
+    console.log(data); 
+
+    svg
+        .selectAll(".bar")
+        .data(data)
+        .enter()
+        .append("rect")
+        .attr("class", "bar")
+        .attr("y", d => scale.y(d))
+        .attr("x", d=> scale.x(d))
+        .attr("width", scale.x.bandwidth())
+        .attr("height", d => scale.y(0) - scale.y(d))
+        .attr("stroke", "black"); 
 
 }
 
