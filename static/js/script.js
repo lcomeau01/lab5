@@ -71,15 +71,16 @@ function draw_scatter(data, svg, scale){
         .attr("cy", d => scale.y(d.y))
         .attr("cx", d=> scale.x(d.x))
         .attr("r", 3)
-        .attr("fill", "red")
+        .attr("fill", "#B22122")
         .attr("stroke", "black")
         .attr("stroke-width", 1);
 }
 
-// TODO: write a function that updates the bar
+// function that updates the bar
 function draw_bar(data, svg, scale){
     console.log(data); 
 
+    // draw the rectangles / bars 
     svg.selectAll("rect")
         .data(data)
         .enter()
@@ -88,7 +89,7 @@ function draw_bar(data, svg, scale){
         .attr("x", d=> scale.x(d.x))
         .attr("width", scale.x.bandwidth())
         .attr("height", d => scale.y(0) - scale.y(d.y))
-        .attr("stroke", "black"); 
+        .attr("fill", "#4682B4"); 
 
 }
 
@@ -112,13 +113,16 @@ function update_scatter(data, svg, scale){
     draw_scatter(data, svg, scale);
 }
 
-// TODO: Write a function that updates the y-axis, removes the old bars, and redraws the bars
+// function that removes the old bars, redraws the y-axis, and redraws the bar chart 
 function update_bar(data, max_count, svg, scale){
+    // remove all old bars 
     svg.selectAll("rect").remove();
     
-    scale.y.domain([0, max_count]); 
-    svg.selectAll('.bar-yaxis').call(d3.axisLeft(scale.y)); 
+    // re-scale the y-axis 
+    scale.y.domain([0, max_count]); // fix the domain so that it only goes up to the new max count 
+    svg.selectAll('.bar-yaxis').call(d3.axisLeft(scale.y)); // call the y-axis function on the given y scale
 
+    // redraw the bars 
     draw_bar(data, svg, scale); 
 }
 
@@ -134,7 +138,7 @@ function update(scatter_svg, bar_svg, scatter_scale, bar_scale){
         })
     }).then(async function(response){
         var results = JSON.parse(JSON.stringify((await response.json())))
-        console.log(results)
+    
         update_scatter(results['scatter_data'], scatter_svg, scatter_scale)
         update_bar(results['bar_data'], results['max_count'], bar_svg, bar_scale)
     })

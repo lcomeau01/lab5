@@ -49,14 +49,15 @@ def update():
     # Extract the data that will populate the scatter plot
     scatter_data = [{'x': float(row['X']), 'y': float(row['Y'])} for _, row in scatter_results.iterrows()]
 
+    # get the month and count for each month depending on the predicates / filters 
     bar_query = f'SELECT month, COUNT(*) FROM forestfires.csv WHERE {predicate} GROUP BY MONTH ORDER BY MONTH'
-    bar_results = duckdb.sql(bar_query).df()
+    bar_results = duckdb.sql(bar_query).df() # turn it into a data frame 
     bar_results['month'] = bar_results.index.map({i: sorted_months[i] for i in range(len(sorted_months))})
-    print(bar_results)
+    
+    # extract the data that will populate the bar chart 
     bar_data = [{'x': row['month'], 'y': int(row['count_star()'])} for _, row in bar_results.iterrows()] 
-    max_count = bar_results['count_star()'].max() if not bar_results.empty else 0 
-
-    print(max_count)
+    # get the max y-value for y-axis scaling purposes 
+    max_count = int(bar_results['count_star()'].max()) if not bar_results.empty else 0 
 
     return {'scatter_data': scatter_data, 'bar_data': bar_data, 'max_count': max_count}
 
