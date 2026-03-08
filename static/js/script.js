@@ -61,14 +61,24 @@ function draw_slider(column, min, max, scatter_svg, bar_svg, scatter_scale, bar_
     });
 }
 
-// TODO: Write a function that draws the scatterplot
+//function that draws the scatterplot
 function draw_scatter(data, svg, scale){
-
+    //console.log("scatter data", data);
+    svg.selectAll("circle")
+        .data(data)
+        .enter()
+        .append("circle")
+        .attr("cy", d => scale.y(d.y))
+        .attr("cx", d=> scale.x(d.x))
+        .attr("r", 3)
+        .attr("fill", "red")
+        .attr("stroke", "black")
+        .attr("stroke-width", 1);
 }
 
 // TODO: write a function that updates the bar
 function draw_bar(data, svg, scale){
-    console.log(data); 
+    //console.log(data); 
 
     svg
         .selectAll(".bar")
@@ -76,27 +86,32 @@ function draw_bar(data, svg, scale){
         .enter()
         .append("rect")
         .attr("class", "bar")
-        .attr("y", d => scale.y(d))
-        .attr("x", d=> scale.x(d))
+        .attr("y", d => scale.y(d.x))
+        .attr("x", d=> scale.x(d.y))
         .attr("width", scale.x.bandwidth())
         .attr("height", d => scale.y(0) - scale.y(d))
         .attr("stroke", "black"); 
 
 }
 
-// TODO: Write a function that extracts the selected days and minimum/maximum values for each slider
+// function that extracts the selected days and minimum/maximum values for each slider
 function get_params(){
-    var day = []
-    var humidity = [0, 0]
-    var temp = [0, 0]
-    var wind = [0, 0]
+    var day = [];
+    d3.selectAll(".checkboxDays:checked").each(function(){
+        day.push(this.value);
+    })
+    var humidity = document.getElementById("humidity-slider").noUiSlider.get().map(Number);
+    var temp = document.getElementById("temp-slider").noUiSlider.get().map(Number);
+    var wind = document.getElementById("wind-slider").noUiSlider.get().map(Number);
+
+    console.log(day);
     return {'day': day, 'humidity': humidity, 'temp': temp, 'wind': wind}
 }
 
-// TODO: Write a function that removes the old data points and redraws the scatterplot
+// function that removes the old data points and redraws the scatterplot
 function update_scatter(data, svg, scale){
-
-    draw_scatter(data, svg, scale)
+    svg.selectAll("circle").remove();
+    draw_scatter(data, svg, scale);
 }
 
 // TODO: Write a function that updates the y-axis, removes the old bars, and redraws the bars
