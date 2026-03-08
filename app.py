@@ -42,7 +42,6 @@ def update():
     selected_days = request_data['day']
     day_values = ', '.join([f"'{d}'" for d in selected_days])
     discrete_predicate = f"day IN ({day_values})" if selected_days else "1=0"
-    #discrete_predicate = ' AND '.join([f'{column} IN ()' for column in discrete_columns]) # TODO: update where clause from checkboxes
     predicate = ' AND '.join([continuous_predicate, discrete_predicate]) # Combine where clause from sliders and checkboxes
 
     scatter_query = f'SELECT X, Y FROM forestfires.csv WHERE {predicate}'
@@ -50,11 +49,14 @@ def update():
     # Extract the data that will populate the scatter plot
     scatter_data = [{'x': float(row['X']), 'y': float(row['Y'])} for _, row in scatter_results.iterrows()]
 
-    bar_query = f'SELECT * FROM forestfires.csv' # TODO: Write a query that retrieves the number of forest fires per month after filtering
+    bar_query = f'SELECT month, COUNT(*) FROM forestfires.csv WHERE {predicate} GROUP BY MONTH ORDER BY MONTH'
     bar_results = duckdb.sql(bar_query).df()
     bar_results['month'] = bar_results.index.map({i: sorted_months[i] for i in range(len(sorted_months))})
-    bar_data = [] # TODO: Extract the data that will populate the bar chart from the results
-    max_count = 0 # TODO: Extract the maximum number of forest fires in a single month from the results
+    print(bar_results)
+    bar_data = [{'x': row['month'], 'y': int(row['count_star()'])} for _, row in bar_results.iterrows()] 
+    max_count = bar_results['count_star()'].max() if not bar_results.empty else 0 
+
+    print(max_count)
 
     return {'scatter_data': scatter_data, 'bar_data': bar_data, 'max_count': max_count}
 

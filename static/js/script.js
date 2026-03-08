@@ -78,18 +78,16 @@ function draw_scatter(data, svg, scale){
 
 // TODO: write a function that updates the bar
 function draw_bar(data, svg, scale){
-    //console.log(data); 
+    console.log(data); 
 
-    svg
-        .selectAll(".bar")
+    svg.selectAll("rect")
         .data(data)
         .enter()
         .append("rect")
-        .attr("class", "bar")
-        .attr("y", d => scale.y(d.x))
-        .attr("x", d=> scale.x(d.y))
+        .attr("y", d => scale.y(d.y))
+        .attr("x", d=> scale.x(d.x))
         .attr("width", scale.x.bandwidth())
-        .attr("height", d => scale.y(0) - scale.y(d))
+        .attr("height", d => scale.y(0) - scale.y(d.y))
         .attr("stroke", "black"); 
 
 }
@@ -116,8 +114,12 @@ function update_scatter(data, svg, scale){
 
 // TODO: Write a function that updates the y-axis, removes the old bars, and redraws the bars
 function update_bar(data, max_count, svg, scale){
+    svg.selectAll("rect").remove();
+    
+    scale.y.domain([0, max_count]); 
+    svg.selectAll('.bar-yaxis').call(d3.axisLeft(scale.y)); 
 
-    draw_bar(data, svg, scale)
+    draw_bar(data, svg, scale); 
 }
 
 function update(scatter_svg, bar_svg, scatter_scale, bar_scale){
@@ -132,6 +134,7 @@ function update(scatter_svg, bar_svg, scatter_scale, bar_scale){
         })
     }).then(async function(response){
         var results = JSON.parse(JSON.stringify((await response.json())))
+        console.log(results)
         update_scatter(results['scatter_data'], scatter_svg, scatter_scale)
         update_bar(results['bar_data'], results['max_count'], bar_svg, bar_scale)
     })
